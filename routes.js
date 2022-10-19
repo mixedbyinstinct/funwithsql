@@ -2,33 +2,32 @@ const mysql = require('mysql');
 
 module.exports = function(app) {
   app.get('/', (req, res) => {
-    res.sendFile('index.html', { root: __dirname       });
+  res.sendFile('index.html', { root: __dirname });
   });
-  
+
   app.post('/search', (req, res) => {
-    console.log(req.body);
-    let valid = /^((\d\d\d\d)\-+(\d\d)\-+(\d\d))/.test(req.body.query);
-    if(!valid) {
-      return res.json({
-        message: 'Bad Format';
-      })
-    }
+    let sql = `SELECT video_link FROM tumbzilla_labels WHERE categories = ?`;
+    let query = req.body.query;
+    
     let con = mysql.createConnection({
       host: 'mysql.funwithsql.instinctmxd.com',
       user: 'databseinstinct',
       password: 'flamingo-22',
       database: 'noaardudb'
     });
+    
     con.connect(function(err) {
-      if(err) return res.json({message: err});
-      let sql = `SELECT FROM rdu WHERE (date = ?)`;
-      con.query(sql, req.body.query, function(err, result) {
-        if(err) return res.json({message: err});
+      if(err) res.json({message: err});
+      
+      con.connect(sql, query, function(err, result) {
+        if(err) res.json({message: err});
+        
         res.json({
-          message: 'search succeeded',
-          output: result
+          message: 'success',
+          videos: result
         })
       })
     })
   })
+
 }
